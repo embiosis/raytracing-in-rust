@@ -18,4 +18,5 @@ fn main() {
             println!("{ir} {ig} {ib}");
         }
     }
+    eprintln!("Completed!");
 }
