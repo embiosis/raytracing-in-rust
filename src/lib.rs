@@ -1,6 +1,8 @@
 // TODO: check for arithmetic overflows and underflows in these functions.
+// TODO: Remove impls for &Vec3 (dereference manually when needed instead).
+
 pub mod vec3 {
-    use std::{f64, ops::{Add, AddAssign, Mul, MulAssign}};
+    use std::{f64, ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Div, DivAssign}};
     #[derive(Clone, Copy)]
     pub struct Vec3(pub f64, pub f64, pub f64);
     
@@ -8,68 +10,44 @@ pub mod vec3 {
     impl Add for Vec3 {
         type Output = Vec3;
 
-        fn add(self, vec: Self) -> Self::Output {
+        fn add(self, rhs: Self) -> Self::Output {
             Vec3(
-                self.x() + vec.x(),
-                self.y() + vec.y(),
-                self.z() + vec.z(),
-            )
-        }
-    }
-
-    impl Add for &Vec3 {
-        type Output = Vec3;
-
-        fn add(self, vec: Self) -> Self::Output {
-            Vec3(
-                self.x() + vec.x(),
-                self.y() + vec.y(),
-                self.z() + vec.z(),
+                self.x() + rhs.x(),
+                self.y() + rhs.y(),
+                self.z() + rhs.z(),
             )
         }
     }
 
     impl AddAssign for Vec3 {
-        fn add_assign(&mut self, vec: Self) {
+        fn add_assign(&mut self, rhs: Self) {
             *self = Vec3(
-                self.x() + vec.x(),
-                self.y() + vec.y(),
-                self.z() + vec.z(),
+                self.x() + rhs.x(),
+                self.y() + rhs.y(),
+                self.z() + rhs.z(),
             );
         }
     }
 
-    // Implement scalar multiplication.
-    impl Mul<f64> for Vec3 {
-        type Output = Vec3;
+    // Implement vector subtraction.
+    impl Sub for Vec3 {
+        type Output = Self;
 
-        fn mul(self, scalar: f64) -> Self::Output {
+        fn sub(self, rhs: Self) -> Self::Output {
             Vec3(
-                self.x() * scalar,
-                self.y() * scalar,
-                self.z() * scalar,
+                self.x() - rhs.x(),
+                self.y() - rhs.y(),
+                self.z() - rhs.z(),
             )
         }
     }
 
-    impl Mul<f64> for &Vec3 {
-        type Output = Vec3;
-
-        fn mul(self, scalar: f64) -> Self::Output {
-            Vec3(
-                self.x() * scalar,
-                self.y() * scalar,
-                self.z() * scalar,
-            )
-        }
-    }
-
-    impl MulAssign<f64> for Vec3 {
-        fn mul_assign(&mut self, scalar: f64) {
+    impl SubAssign for Vec3 {
+        fn sub_assign(&mut self, rhs: Self) {
             *self = Vec3(
-                self.x() * scalar,
-                self.y() * scalar,
-                self.z() * scalar,
+                self.x() - rhs.x(),
+                self.y() - rhs.y(),
+                self.z() - rhs.z(),
             );
         }
     }
@@ -78,10 +56,56 @@ pub mod vec3 {
     impl Mul for Vec3 {
         type Output = f64;
 
-        fn mul(self, vec: Vec3) -> Self::Output {
-            self.x() * vec.x() + self.y() + vec.y() + self.z() * vec.z()
+        fn mul(self, rhs: Self) -> Self::Output {
+            self.x() * rhs.x() + self.y() + rhs.y() + self.z() * rhs.z()
         }
-    }    
+    }
+
+    // Implement scalar multiplication.
+    impl Mul<f64> for Vec3 {
+        type Output = Vec3;
+
+        fn mul(self, rhs: f64) -> Self::Output {
+            Vec3(
+                self.x() * rhs,
+                self.y() * rhs,
+                self.z() * rhs,
+            )
+        }
+    }
+
+    impl MulAssign<f64> for Vec3 {
+        fn mul_assign(&mut self, rhs: f64) {
+            *self = Vec3(
+                self.x() * rhs,
+                self.y() * rhs,
+                self.z() * rhs,
+            );
+        }
+    }
+
+    // Implement scalar division.
+    impl Div<f64> for Vec3 {
+        type Output = Vec3;
+
+        fn div(self, rhs: f64) -> Self::Output {
+            Vec3(
+                self.x() / rhs,
+                self.y() / rhs,
+                self.z() / rhs,
+            )
+        }
+    }
+
+    impl DivAssign<f64> for Vec3 {
+        fn div_assign(&mut self, rhs: f64) {
+            *self = Vec3(
+                self.x() / rhs,
+                self.y() / rhs,
+                self.z() / rhs,
+            );
+        }
+    }
 
     impl Vec3 {
         pub fn x(&self) -> f64 {
@@ -97,24 +121,27 @@ pub mod vec3 {
         }
 
         pub fn print(&self) {
-            println!("<{} {} {}>", self.x(), self.y(), self.z());
+            println!("<{}, {}, {}>", self.x(), self.y(), self.z());
+        }
+
+        pub fn sqrlen(&self) -> f64 {
+            (*self) * (*self)
         }
 
         pub fn len(&self) -> f64 {
-            (self.x() * self.x() + self.y() * self.y() + self.z() * self.z()).sqrt()
+            self.sqrlen().sqrt()
         }
 
         pub fn unit(&self) -> Vec3 {
-            *self * (1 as f64 / self.len())
+            (*self) / self.len()
         }
     }
 
-    // TODO: check for arithmetic overflows / underflows?
-    pub fn cross(vec1: Vec3, vec2: Vec3) -> Vec3 {
+    pub fn cross(vec1: &Vec3, vec2: &Vec3) -> Vec3 {
         Vec3(
-            vec1.1 * vec2.2 - vec1.2 * vec2.1,
-            vec1.2 * vec2.0 - vec1.0 * vec2.2,
-            vec1.0 * vec2.1 - vec1.1 * vec2.0
+            vec1.y() * vec2.z() - vec1.z() * vec2.y(),
+            vec1.z() * vec2.x() - vec1.x() * vec2.z(),
+            vec1.x() * vec2.y() - vec1.y() * vec2.x(),
         )
     }
 }
