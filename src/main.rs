@@ -13,6 +13,8 @@ fn main() {
 
     let z = x * y;
     let b = x - y;
+    let f = 5 as f64 * y;
+    let g = y * 3.5;
 
     x.print();
     y.print();
