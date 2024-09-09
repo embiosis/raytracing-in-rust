@@ -78,11 +78,7 @@ pub mod vec3 {
         type Output = Vec3;
 
         fn mul(self, rhs: Vec3) -> Self::Output {
-            Vec3(
-                rhs.x() * self,
-                rhs.y() * self,
-                rhs.z() * self,
-            )
+            rhs * self
         }
     }
 
@@ -156,4 +152,21 @@ pub mod vec3 {
             vec1.x() * vec2.y() - vec1.y() * vec2.x(),
         )
     }
+}
+
+pub mod ray {
+    use crate::vec3::Vec3;
+
+    pub struct Ray {
+        pub origin: Vec3,
+        pub direction: Vec3,
+    }
+
+    impl Ray {
+        fn at(&self, lambda: f64) -> Vec3 {
+            self.origin + self.direction * lambda
+        }
+    }
+
+
 }
