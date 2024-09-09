@@ -167,6 +167,4 @@ pub mod ray {
             self.origin + self.direction * lambda
         }
     }
-
-
 }
