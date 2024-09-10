@@ -1,31 +1,34 @@
 extern crate bmp;
 
+#[allow(unused_imports)]
 use bmp::{Image, Pixel, px};
-use raytracer::vec3::Vec3;
-use raytracer::ray::Ray;
+use raytracer::graphics::Vec3;
 
+#[allow(unused_imports)]
+use raytracer::graphics::Ray;
+use raytracer::graphics::Viewport;
+
+use std::env::args;
+
+const DEFAULT_WIDTH: u32 = 1920;
+const DEFAULT_ASPECT_RATIO: f64 = 16.0 / 9.0;
 
 fn main() {
-    let aspect_ratio: f64 = (16 as f64) / (9 as f64);
-    println!("{aspect_ratio}");
+    let args: Vec<String> = args().collect();
+    let mut width: u32 = DEFAULT_WIDTH;
+    let mut aspect_ratio: f64 = DEFAULT_ASPECT_RATIO;
 
-    let width: u32 = 400;
-    let height: u32 = std::cmp::max((width as f64 / aspect_ratio) as u32, 1);
-
-    let z = Ray {origin: Vec3(1.0, 2.0, 3.0), direction: Vec3(5.0, 5.5, 3.0)};
-
-
-    let mut img = Image::new(width, height);
-
-    for (x, y) in img.coordinates() {
-        if x == 0 {
-            // eprintln!("Scanlines remaining: {}", height - y);
-        }
-        img.set_pixel(x, y, px!(255.999 * x as f64 / (width - 1) as f64, 255.999 * y as f64 / (height - 1) as f64, 255.999 * 0.0));
+    // parse arguments
+    if args.len() >= 2 {
+        width = args[1].trim().parse().unwrap();
     }
 
-    // eprintln!("Completed!");
+    if args.len() >= 3 {
+        aspect_ratio = args[2].trim().parse().unwrap();
+    }
 
-    let _ = img.save("output/test.bmp");
-    // eprintln!("File saved!");
+
+    let viewport = Viewport::new(width, 0.0, 2.0, aspect_ratio, Vec3::zero());
+
+    viewport.render(format!("output/test-{}x{}.bmp", viewport.image_width, viewport.image_height));
 }
