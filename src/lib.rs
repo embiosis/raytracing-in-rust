@@ -3,14 +3,33 @@
 pub mod graphics {
     const RGB_SCALE: f64 =  255.999;
 
-    use std::{f64, ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Div, DivAssign}};
+    use std::{f64, fmt::Display, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign}};
     use bmp::{Pixel, px, Image};
     #[derive(Clone, Copy, Debug)]
-    pub struct Vec3(pub f64, pub f64, pub f64);
-    
+    pub struct Vec3<T: Numeric>(pub T, pub T, pub T);
+
+    macro_rules! numeric_impl {
+        ($($types:ty),*) => {
+            // Create a marker trait to mark numeric types
+            pub trait Numeric: 
+                Clone + 
+                Copy + 
+                Add<Output = Self> + 
+                Mul<Output = Self> + 
+                Div<Output = Self> + 
+                Sub<Output = Self> +
+                PartialOrd +
+                Display
+            {}
+            $(impl Numeric for $types {})*
+        };
+    }
+
+    numeric_impl!(f32, f64, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);
+
     // Implement vector addition.
-    impl Add for Vec3 {
-        type Output = Vec3;
+    impl<T: Numeric> Add for Vec3<T> {
+        type Output = Vec3<T>;
 
         fn add(self, rhs: Self) -> Self::Output {
             Vec3(
@@ -21,7 +40,7 @@ pub mod graphics {
         }
     }
 
-    impl AddAssign for Vec3 {
+    impl<T: Numeric> AddAssign for Vec3<T> {
         fn add_assign(&mut self, rhs: Self) {
             *self = Vec3(
                 self.x() + rhs.x(),
@@ -32,7 +51,7 @@ pub mod graphics {
     }
 
     // Implement vector subtraction.
-    impl Sub for Vec3 {
+    impl<T: Numeric> Sub for Vec3<T> {
         type Output = Self;
 
         fn sub(self, rhs: Self) -> Self::Output {
@@ -44,7 +63,7 @@ pub mod graphics {
         }
     }
 
-    impl SubAssign for Vec3 {
+    impl<T: Numeric> SubAssign for Vec3<T> {
         fn sub_assign(&mut self, rhs: Self) {
             *self = Vec3(
                 self.x() - rhs.x(),
@@ -55,8 +74,8 @@ pub mod graphics {
     }
 
     // Implement dot product.
-    impl Mul for Vec3 {
-        type Output = f64;
+    impl<T: Numeric> Mul<Vec3<T>> for Vec3<T> {
+        type Output = T;
 
         fn mul(self, rhs: Self) -> Self::Output {
             self.x() * rhs.x() + self.y() + rhs.y() + self.z() * rhs.z()
@@ -64,10 +83,11 @@ pub mod graphics {
     }
 
     // Implement scalar multiplication.
-    impl Mul<f64> for Vec3 {
-        type Output = Vec3;
+    // TODO: Is making multiplication this generic a bad idea?
+    impl<T: Numeric> Mul<T> for Vec3<T> {
+        type Output = Vec3<T>;
 
-        fn mul(self, rhs: f64) -> Self::Output {
+        fn mul(self, rhs: T) -> Self::Output {
             Vec3(
                 self.x() * rhs,
                 self.y() * rhs,
@@ -76,16 +96,16 @@ pub mod graphics {
         }
     }
 
-    impl Mul<Vec3> for f64 {
-        type Output = Vec3;
+    impl<T: Numeric> Mul<Vec3<T>> for T {
+        type Output = Vec3<T>;
 
-        fn mul(self, rhs: Vec3) -> Self::Output {
+        fn mul(self, rhs: Vec3<T>) -> Self::Output {
             rhs * self
         }
     }
 
-    impl MulAssign<f64> for Vec3 {
-        fn mul_assign(&mut self, rhs: f64) {
+    impl<T: Numeric> MulAssign<T> for Vec3<T> {
+        fn mul_assign(&mut self, rhs: T) {
             *self = Vec3(
                 self.x() * rhs,
                 self.y() * rhs,
@@ -95,10 +115,10 @@ pub mod graphics {
     }
 
     // Implement scalar division.
-    impl Div<f64> for Vec3 {
-        type Output = Vec3;
+    impl<T: Numeric> Div<T> for Vec3<T> {
+        type Output = Vec3<T>;
 
-        fn div(self, rhs: f64) -> Self::Output {
+        fn div(self, rhs: T) -> Self::Output {
             Vec3(
                 self.x() / rhs,
                 self.y() / rhs,
@@ -107,8 +127,8 @@ pub mod graphics {
         }
     }
 
-    impl DivAssign<f64> for Vec3 {
-        fn div_assign(&mut self, rhs: f64) {
+    impl<T: Numeric> DivAssign<T> for Vec3<T> {
+        fn div_assign(&mut self, rhs: T) {
             *self = Vec3(
                 self.x() / rhs,
                 self.y() / rhs,
@@ -117,46 +137,60 @@ pub mod graphics {
         }
     }
 
-    impl Vec3 {
-        pub fn x(&self) -> f64 {
+    impl<T: Numeric> Vec3<T> {
+        pub fn x(&self) -> T {
             self.0
         }
 
-        pub fn y(&self) -> f64 {
+        pub fn y(&self) -> T {
             self.1
         }
 
-        pub fn z(&self) -> f64 {
+        pub fn z(&self) -> T {
             self.2
         }
 
-        pub fn new(x: i32, y: i32, z: i32) -> Self {
+        pub fn new(x: T, y: T, z: T) -> Self {
             Self (
-                x as f64,
-                y as f64,
-                z as f64
+                x,
+                y,
+                z,
             )
         }
 
-        pub fn zero() -> Self {
-            Self(0.0, 0.0, 0.0)
+        pub fn zero_i32() -> Vec3<i32> {
+            Vec3(0, 0, 0)
+        }
+
+        pub fn zero_f64() -> Vec3<f64> {
+            Vec3(0.0, 0.0, 0.0)
         }
 
         pub fn print(&self) {
             println!("<{}, {}, {}>", self.x(), self.y(), self.z());
         }
 
-        pub fn sqrlen(&self) -> f64 {
+        pub fn sqrlen(&self) -> T {
             (*self) * (*self)
         }
 
-        // Handle floating point errors by using .max()
+        // Get the length of a vector.
+        // If any floating point errors are encountered, returns 0.0f.
         pub fn len(&self) -> f64 {
             self.sqrlen().max(0.0).sqrt()
         }
 
-        // Avoid division by zero by checking the edge case
-        pub fn unit(&self) -> Vec3 {
+        // Normalises a vector into its unit vector.
+        // TODO: Decide on the functionality of this function if Vec3 is the zero vector.
+        // TODO: Should it return None or Vec3::zero()?
+        // pub fn unit(&self) -> Option<Vec3> {
+        //     if self.len() == 0.0 {
+        //         None
+        //     } else {
+        //         Some((*self) / self.len())
+        //     }
+        // }
+        pub fn unit(&self) -> Vec3<T> {
             if self.len() == 0.0 {
                 Vec3::zero()
             } else {
@@ -165,7 +199,8 @@ pub mod graphics {
         }
     }
 
-    pub fn cross(vec1: &Vec3, vec2: &Vec3) -> Vec3 {
+    // Implement cross product
+    pub fn cross<T: Clone>(vec1: &Vec3<T>, vec2: &Vec3<T>) -> Vec3<T> {
         Vec3(
             vec1.y() * vec2.z() - vec1.z() * vec2.y(),
             vec1.z() * vec2.x() - vec1.x() * vec2.z(),
@@ -174,13 +209,13 @@ pub mod graphics {
     }
 
     #[derive(Debug)]
-    pub struct Ray {
-        pub origin: Vec3,
-        pub direction: Vec3,
+    pub struct Ray<T: Clone> {
+        pub origin: Vec3<T>,
+        pub direction: Vec3<T>,
     }
 
-    impl Ray {
-        pub fn at(&self, lambda: f64) -> Vec3 {
+    impl<T: Clone> Ray<T> {
+        pub fn at(&self, lambda: f64) -> Vec3<T> {
             self.origin + self.direction * lambda
         }
 
@@ -189,7 +224,8 @@ pub mod graphics {
             px!(0, 0, 0)
         }
 
-        pub fn lerp(&self) -> Pixel {
+        // TODO: Implement actual values on this.
+        pub fn lerp(&self,) -> Pixel {
             let unit_vec = self.direction.unit();
             let y = 0.5 * (unit_vec.y() + 1.0);
             ((1.0 - y) * MyPixel::new(1.0, 1.0, 1.0) + y * MyPixel::new(0.5, 0.7, 1.0)).to_pixel()
@@ -267,15 +303,17 @@ pub mod graphics {
             }
         }
 
-        fn to_pixel(&self) -> Pixel {
-            // ! DEBUG STATEMENT - ensure no overflows
-            assert!(self.is_valid());
-
-            px!((self.r * RGB_SCALE) as u8, (self.g * RGB_SCALE) as u8, (self.b * RGB_SCALE) as u8)
-        }
-
-        fn is_valid(&self) -> bool {
+        fn is_valid_rgb(&self) -> bool {
             (self.r >= 0.0 && self.r <= 255.0) && (self.g >= 0.0 && self.g <= 255.0) && (self.b >= 0.0 && self.b <= 255.0)
+        }
+    }
+
+    impl From<MyPixel> for Pixel {
+        fn from(value: MyPixel) -> Self {
+            // ! DEBUG STATEMENT - ensure value is a valid RGB pixel.
+            assert!(value.is_valid_rgb());
+
+            px!((value.r * RGB_SCALE) as u8, (value.g * RGB_SCALE) as u8, (value.b * RGB_SCALE) as u8)
         }
     }
 
