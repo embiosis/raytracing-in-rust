@@ -1,5 +1,4 @@
 // TODO: check for arithmetic overflows and underflows in these functions.
-// TODO: Remove impls for &Vec3 (dereference manually when needed instead).
 
 pub mod graphics {
     const RGB_SCALE: f64 =  255.999;
