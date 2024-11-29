@@ -1,5 +1,5 @@
 use bmp::Image;
-use super::{vec3::Vec3, ray::Ray};
+use super::{colour::Colour, ray::Ray, vec3::Vec3};
 
 pub struct Viewport {
     pub image_height: u32,
@@ -55,6 +55,19 @@ impl Viewport {
             }
         }
 
-        let _ = img.save(save_path);
+        img.save(save_path).expect("An error occurred while saving to {save_path}!")
+    }
+
+    pub fn test(&self, save_path: String) {
+        let mut img = Image::new(self.image_width, self.image_height);
+        for (x, y) in img.coordinates() {
+            img.set_pixel(x, y, Colour::new(
+                x as f64/ (self.image_width - 1) as f64 * 255.999,
+                y as f64/ (self.image_height - 1) as f64 * 255.999,
+                0.0
+            ).into());
+        }
+
+        img.save(save_path).expect("An error occurred while saving to {save_path}!")
     }
 }
