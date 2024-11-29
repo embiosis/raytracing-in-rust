@@ -35,43 +35,33 @@ impl Viewport {
         
         // Calculate the actual aspect ratio.
         let aspect_ratio = image_width as f64 / image_height as f64;
+        let viewport_width = viewport_size * aspect_ratio;
+        let viewport_height = viewport_size;
 
         Viewport {
             image_width,
             image_height,
             focal_length,
-            viewport_width: viewport_size * aspect_ratio,
-            viewport_height: viewport_size,
+            viewport_width,
+            viewport_height,
             camera_center,
             viewport_center: Vec3::new(0.0, 0.0, focal_length),
-            viewport_i: Vec3::new(viewport_size, 0.0, 0.0),
+            viewport_i: Vec3::new(viewport_width, 0.0, 0.0),
             // invert y-axis due to orientation of viewport coordinates
-            viewport_j: Vec3::new(0.0, -viewport_size, 0.0), 
-            pixel_delta_i: Vec3::new(viewport_size, 0.0, 0.0) / image_width as f64 / aspect_ratio,
-            pixel_delta_j: Vec3::new(0.0, -viewport_size, 0.0) / (image_width as f64),
+            viewport_j: Vec3::new(0.0, -viewport_height, 0.0), 
+            pixel_delta_i: Vec3::new(viewport_width, 0.0, 0.0) / image_width as f64,
+            pixel_delta_j: Vec3::new(0.0, -viewport_height, 0.0) / image_width as f64,
             viewport_upper_left: camera_center 
                                 - Vec3::new(0.0, 0.0, focal_length) 
-                                - Vec3::new(viewport_size * aspect_ratio, 0.0, 0.0) / 2.0 
-                                - Vec3::new(0.0, -viewport_size, 0.0) / 2.0
+                                - Vec3::new(viewport_width, 0.0, 0.0) / 2.0 
+                                - Vec3::new(0.0, -viewport_height, 0.0) / 2.0
         }
     }
 
-    pub fn render(&self, save_path: String) {
+    // Chapter 2.2 image
+    pub fn test_file_format(&self, save_path: String) {
         let mut img = Image::new(self.image_width, self.image_height);
 
-        for (x, y) in img.coordinates() {
-            let pixel_center = self.get_pixel_coord(x, y);
-            let ray_dir = pixel_center - self.camera_center;
-            let ray = Ray { origin: self.camera_center, direction: ray_dir };
-            // println!("({x}, {y}): Ray {{{}, {}}}, {}", ray.origin, ray.direction, ray.gradient(Colour::white(), Colour::blue()));
-            img.set_pixel(x, y, ray.gradient(Colour::white(), Colour::blue()));
-        }
-
-        img.save(save_path).expect("An error occurred while saving to {save_path}!")
-    }
-
-    pub fn test(&self, save_path: String) {
-        let mut img = Image::new(self.image_width, self.image_height);
         for (x, y) in img.coordinates() {
             img.set_pixel(x, y, Colour::new(
                 x as f64 / (self.image_width - 1) as f64 * RGB_SCALE,
@@ -82,4 +72,20 @@ impl Viewport {
 
         img.save(save_path).expect("An error occurred while saving to {save_path}!")
     }
+
+    // Chapter 4.2 image
+    pub fn test_gradient(&self, save_path: String) {
+        let mut img = Image::new(self.image_width, self.image_height);
+
+        for (x, y) in img.coordinates() {
+            let pixel_center = self.get_pixel_coord(x, y);
+            let ray_dir = pixel_center - self.camera_center;
+            let ray = Ray { origin: self.camera_center, direction: ray_dir };
+            // print!("({x}, {y}): ");
+            img.set_pixel(x, y, ray.gradient(Colour::white(), Colour::blue()));
+        }
+
+        img.save(save_path).expect("An error occurred while saving to {save_path}!")
+    }
+
 }

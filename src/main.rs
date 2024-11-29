@@ -38,7 +38,7 @@ fn main() {
         height = (width as f64 / DEFAULT_ASPECT_RATIO) as u32;
     }
 
-    let viewport = Viewport::new(width, height, 0.0, 2.0, Vec3::zero());
+    let viewport = Viewport::new(width, height, 1.0, 2.0, Vec3::zero());
 
     // TODO: Remove this stub and use clap to properly parse arguments!
     // TODO: Take a user-defined file name, or use the current time as a default.
@@ -50,8 +50,8 @@ fn main() {
     };
     
     match args.get(1).unwrap().trim() {
-        "test" => viewport.test(save_path),
-        "render" => viewport.render(save_path),
+        "test" => viewport.test_file_format(save_path),
+        "render" => viewport.test_gradient(save_path),
         _ => eprintln!("Unexpected raytracing mode. Please specify either test or render.")
     }
 }
