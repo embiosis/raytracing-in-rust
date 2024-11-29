@@ -7,7 +7,7 @@ use raytracer::graphics::{viewport::*, vec3::*};
 use std::{env::args, time::{SystemTime, UNIX_EPOCH}};
 
 const DEFAULT_WIDTH: u32 = 1920;
-const DEFAULT_HEIGHT: u32 = 1080;
+const DEFAULT_ASPECT_RATIO: f64 = 16.0 / 9.0;
 
 // TODO: Remove this enum and the attribute later.
 #[allow(dead_code)]
@@ -19,24 +19,23 @@ enum FileNameType {
 fn main() {
     let args: Vec<String> = args().collect();
     let mut width: u32 = DEFAULT_WIDTH;
-    let mut height: u32 = DEFAULT_HEIGHT;
+    let height: u32;
 
     // parse arguments
-    if args.len() <= 3 {
-        println!("Usage: cargo run -- [test | render] [width] [height]");
+    if args.len() < 3 {
+        println!("usage: cargo run -- [test | render] [width] (height)");
+        println!("if no height is provided, the program will default to an aspect ratio of 16:9");
         return;
     }
 
-    if args.len() > 3 {
+    if args.len() >= 3 {
         width = args[2].trim().parse().unwrap();
-        // ! DEBUG STATEMENT
-        // println!("width: {width}")
     }
     
-    if args.len() > 4 {
+    if args.len() >= 4 {
         height = args[3].trim().parse().unwrap();
-        // ! DEBUG STATEMENT
-        // println!("height: {height}")
+    } else {
+        height = (width as f64 / DEFAULT_ASPECT_RATIO) as u32;
     }
 
     let viewport = Viewport::new(width, height, 0.0, 2.0, Vec3::zero());
