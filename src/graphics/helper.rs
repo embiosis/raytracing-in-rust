@@ -2,114 +2,162 @@
 // Create a struct with the specified fields which implements vector arithmetic.
 #[macro_export]
 macro_rules! impl_vec_struct {
-    (pub $type_name:ident => {
+    (pub $type:ident => {
         $($fields:ident: $types:ty),*
     }) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
-        pub struct $type_name {
+        pub struct $type {
             $(pub $fields: $types),*
         }
 
-        impl_vec_struct!(@rest $type_name => {
+        impl_vec_struct!(@rest $type => {
             $($fields: $types),*
         });
     };
 
-    ($type_name:ident => {
+    ($type:ident => {
         $($fields:ident: $types:ty),*
     }) => {
         #[derive(Debug, Clone, Copy)]
-        struct $type_name {
+        struct $type {
             $(pub $fields: $types),*
         }
         
-        impl_vec_struct!(@rest $type_name => {
+        impl_vec_struct!(@rest $type => {
             $($fields: $types),*
         });
     };
 
-    (@rest $type_name:ident => {
+    (@rest $type:ident => {
         $($fields:ident: $types:ty),*
     }) => {
         // Implement vector addition.
-        impl std::ops::Add for $type_name {
-            type Output = Self;
+        impl std::ops::Add for $type {
+            type Output = $type;
             
             fn add(self, rhs: Self) -> Self::Output {
-                $type_name {
+                $type {
                     $($fields: self.$fields + rhs.$fields,)*
                 }
             }
         }
 
-        impl std::ops::AddAssign for $type_name {
+        impl std::ops::Add for &$type {
+            type Output = $type;
+            
+            fn add(self, rhs: Self) -> Self::Output {
+                $type {
+                    $($fields: self.$fields + rhs.$fields,)*
+                }
+            }
+        }
+
+        impl std::ops::AddAssign for $type {
             fn add_assign(&mut self, rhs: Self) {
-                *self = $type_name {
+                *self = $type {
                     $($fields: self.$fields + rhs.$fields,)*
                 }
             }
         }
 
         // Implement vector subtraction.
-        impl std::ops::Sub for $type_name {
-            type Output = Self;
+        impl std::ops::Sub for $type {
+            type Output = $type;
 
             fn sub(self, rhs: Self) -> Self::Output {
-                $type_name {
+                $type {
                     $($fields: self.$fields - rhs.$fields,)*
                 }
             }
         }
 
-        impl std::ops::SubAssign for $type_name {
+        impl std::ops::Sub for &$type {
+            type Output = $type;
+
+            fn sub(self, rhs: Self) -> Self::Output {
+                $type {
+                    $($fields: self.$fields - rhs.$fields,)*
+                }
+            }
+        }
+
+        impl std::ops::SubAssign for $type {
             fn sub_assign(&mut self, rhs: Self) {
-                *self = $type_name {
+                *self = $type {
                     $($fields: self.$fields - rhs.$fields,)*
                 }
             }
         }
 
         // Implement scalar multiplication.
-        impl std::ops::Mul<f64> for $type_name {
-            type Output = Self;
+        impl std::ops::Mul<f64> for $type {
+            type Output = $type;
     
             fn mul(self, rhs: f64) -> Self::Output {
-                $type_name {
+                $type {
+                    $($fields: self.$fields * rhs,)*
+                }
+            }
+        }
+        
+        impl std::ops::Mul<f64> for &$type {
+            type Output = $type;
+    
+            fn mul(self, rhs: f64) -> Self::Output {
+                $type {
                     $($fields: self.$fields * rhs,)*
                 }
             }
         }
     
-        impl std::ops::Mul<$type_name> for f64 {
-            type Output = $type_name;
+        impl std::ops::Mul<$type> for f64 {
+            type Output = $type;
     
-            fn mul(self, rhs: $type_name) -> Self::Output {
+            fn mul(self, rhs: $type) -> Self::Output {
+                rhs * self
+            }
+        }
+
+        impl std::ops::Mul<&$type> for f64 {
+            type Output = $type;
+    
+            fn mul(self, rhs: &$type) -> Self::Output {
                 rhs * self
             }
         }
     
-        impl std::ops::MulAssign<f64> for $type_name {
+        impl std::ops::MulAssign<f64> for $type {
             fn mul_assign(&mut self, rhs: f64) {
-                *self = $type_name {
+                *self = $type {
                     $($fields: self.$fields * rhs,)*
                 }
             }
         }
 
         // Implement scalar division.
-        impl std::ops::Div<f64> for $type_name {
-            type Output = $type_name;
+        impl std::ops::Div<f64> for $type {
+            type Output = $type;
     
             fn div(self, rhs: f64) -> Self::Output {
-                $type_name {
+                $type {
+                    $($fields: self.$fields / rhs,)*
+                }
+            }
+        }
+
+        impl std::ops::Div<f64> for &$type {
+            type Output = $type;
+    
+            fn div(self, rhs: f64) -> Self::Output {
+                $type {
                     $($fields: self.$fields / rhs,)*
                 }
             }
         }
     
-        impl std::ops::DivAssign<f64> for $type_name {
+        impl std::ops::DivAssign<f64> for $type {
             fn div_assign(&mut self, rhs: f64) {
-                *self = $type_name {
+                *self = $type {
                     $($fields: self.$fields / rhs,)*
                 }
             }

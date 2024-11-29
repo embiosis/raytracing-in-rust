@@ -50,9 +50,9 @@ impl Vec3 {
 
     // Avoid division by zero by checking the edge case
     // TODO: Decide how to handle the zero vector. Should it return None or Vec3::zero()?
-    pub fn unit(&self) -> Vec3 {
+    pub fn normalise(&self) -> Vec3 {
         if self.len() == 0.0 {
-            Vec3::zero()
+            panic!("Division by zero!")
         } else {
             (*self) / self.len()
         }

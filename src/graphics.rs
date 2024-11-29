@@ -1,4 +1,3 @@
-// TODO: check for arithmetic overflows and underflows in these functions.
 pub mod helper;
 
 pub mod viewport;
