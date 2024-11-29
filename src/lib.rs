@@ -5,9 +5,237 @@ pub mod graphics {
 
     use std::{f64, ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Div, DivAssign}};
     use bmp::{Pixel, px, Image};
-    #[derive(Clone, Copy, Debug)]
-    pub struct Vec3(pub f64, pub f64, pub f64);
+    // #[derive(Clone, Copy, Debug)]
+    // pub struct Vec3(f64, f64, f64);
+
+    // type Point = Vec3;
     
+    macro_rules! impl_vec {
+        (pub $type_name:ident => {
+            $($fields:ident: $types:ty),*
+        }) => {
+            #[derive(Debug, Clone)]
+            pub struct $type_name {
+                $(pub $fields: $types),*
+            }
+        };
+
+        (pub $type_name:ident => (
+            $($types:ty),*
+        )) => {
+            #[derive(Debug, Clone)]
+            pub struct $type_name (
+                $(pub $types),*
+            )
+        };
+        ($type_name:ident => {
+            $($fields:ident: $types:ty),*
+        }) => {
+            #[derive(Debug, Clone)]
+            struct $type_name {
+                $(pub $fields: $types),*
+            }
+        };
+
+        ($type_name:ident => (
+            $($types:ty),*
+        )) => {
+            #[derive(Debug, Clone)]
+            struct $type_name (
+                $(pub $types),*
+            )
+        };
+    }
+
+    macro_rules! impl_vec_add {            
+        ($type_name:ident => (
+            $($fields:ident),*
+        )) => {
+            // Implement vector addition.
+            impl Add for $type_name {
+                type Output = Self;
+                
+                fn add(self, rhs: Self) -> Self::Output {
+                    $type_name(
+                        $(self.$fields + rhs.$fields,)*
+                    )
+                }
+            }
+
+            impl AddAssign for $type_name {
+                fn add_assign(&mut self, rhs: Self) {
+                    *self = $type_name(
+                        $(self.$fields + rhs.$fields,)*
+                    )
+                }
+            }
+        };
+    }
+
+    macro_rules! impl_vec_sub {
+        ($type_name:ident => (
+            $($fields:ident),*
+        )) => {
+            // Implement vector subtraction.
+            impl Sub for $type_name {
+                type Output = Self;
+
+                fn sub(self, rhs: Self) -> Self::Output {
+                    $type_name(
+                        $(self.$fields - rhs.$fields,)*
+                    )
+                }
+            }
+
+            impl SubAssign for $type_name {
+                fn sub_assign(&mut self, rhs: Self) {
+                    *self = $type_name(
+                        $(self.$fields - rhs.$fields,)*
+                    );
+                }
+            }
+        };
+    }
+
+    macro_rules! impl_vec_mul {
+        ($type_name:ident => (
+            $($fields:ident),*
+        )) => {        
+            // Implement scalar multiplication.
+            impl Mul<f64> for $type_name {
+                type Output = Self;
+        
+                fn mul(self, rhs: f64) -> Self::Output {
+                    $type_name(
+                        $(self.$fields * rhs,)*
+                    )
+                }
+            }
+        
+            impl Mul<$type_name> for f64 {
+                type Output = $type_name;
+        
+                fn mul(self, rhs: $type_name) -> Self::Output {
+                    rhs * self
+                }
+            }
+        
+            impl MulAssign<f64> for $type_name {
+                fn mul_assign(&mut self, rhs: f64) {
+                    *self = $type_name(
+                        $(self.$fields * rhs,)*
+                    );
+                }
+            }
+        };
+    }
+
+    macro_rules! impl_vec_div {
+        ($type_name:ident => (
+            $($fields:ident),*
+        )) => {
+            // Implement scalar division.
+            impl Div<f64> for $type_name {
+                type Output = $type_name;
+        
+                fn div(self, rhs: f64) -> Self::Output {
+                    $type_name(
+                        $(self.$fields / rhs,)*
+                    )
+                }
+            }
+        
+            impl DivAssign<f64> for $type_name {
+                fn div_assign(&mut self, rhs: f64) {
+                    *self = $type_name(
+                        $(self.$fields / rhs,)*
+                    );
+                }
+            }
+        };
+    }
+    
+    macro_rules! impl_vec_dot {
+        (@sum $h:expr) => ($h);
+        (@sum $h:expr, $($t:expr),*) => {
+            ($h + impl_vec_dot!(@sum $($t),*));
+        };
+        ($type_name:ident => (
+            $($fields:ident),*
+        )) => {
+            // Implement dot product.
+            impl Mul for $type_name {
+                type Output = f64;
+        
+                fn mul(self, rhs: Self) -> Self::Output {
+                    impl_vec_dot!(@sum $(self.$fields * self.$fields),*);
+                }
+            }
+        };
+    }
+    
+    macro_rules! impl_vec_math {
+        (@rest $type_name:ident => (
+            $($fields:ident),*
+        )) => {
+            impl_vec_add!($type_name => ($($fields),*));
+            impl_vec_sub!($type_name => ($($fields),*));
+            impl_vec_mul!($type_name => ($($fields),*));
+            impl_vec_div!($type_name => ($($fields),*));
+            impl_vec_dot!($type_name => ($($fields),*));
+        };
+
+        // ! Assumes that there are three fields in the tuple struct
+        // ! Currently trying to find a way to generalise this.
+        (@rest_tuple $type_name:ident => (
+            $($fields:ident),*
+        )) => {
+            impl_vec_add!($type_name => (0, 1, 2));
+            impl_vec_sub!($type_name => (0, 1, 2));
+            impl_vec_mul!($type_name => (0, 1, 2));
+            impl_vec_div!($type_name => (0, 1, 2));
+            impl_vec_dot!($type_name => (0, 1, 2));
+        };
+
+        (pub $type_name:ident => {
+            $($fields:ident: $types:ty),*
+        }) => {
+            impl_vec!(pub $type_name:ident => {
+                $($fields:ident: $types:ty),*
+            });
+            impl_vec_math!(@rest $type_name => ($($fields),*));
+        };
+
+        (pub $type_name:ident => (
+            $($fields:ident),*
+        )) => {
+            impl_vec!(pub $type_name:ident => (
+                $($fields:ident),*
+            ));
+            impl_vec_math!(@rest_tuple $type_name => ($($fields),*));
+        };
+
+        ($type_name:ident => {
+            $($fields:ident: $types:ty),*
+        }) => {
+            impl_vec!(pub $type_name:ident => {
+                $($fields:ident: $types:ty),*
+            });
+            impl_vec_math!(@rest $type_name => ($($fields),*));
+        };
+
+        ($type_name:ident => (
+            $($types:ty),*
+        )) => {
+            impl_vec!(pub $type_name:ident => (
+                $($types:ty),*
+            ));
+            impl_vec_math!(@rest_tuple $type_name => ($($fields),*));
+        };
+    }
+
+    impl_vec_math!(pub Vec3 => (f64, f64, f64));
+
     // Implement vector addition.
     impl Add for Vec3 {
         type Output = Vec3;
@@ -130,11 +358,14 @@ pub mod graphics {
             self.2
         }
 
-        pub fn new(x: i32, y: i32, z: i32) -> Self {
+        pub fn new<T>(x: T, y: T, z: T) -> Self 
+        where
+            T: Into<f64>
+        {
             Self (
-                x as f64,
-                y as f64,
-                z as f64
+                x.into(),
+                y.into(),
+                z.into(),
             )
         }
 
@@ -156,6 +387,7 @@ pub mod graphics {
         }
 
         // Avoid division by zero by checking the edge case
+        // TODO: Decide how to handle the zero vector. Should it return None or Vec3::zero()?
         pub fn unit(&self) -> Vec3 {
             if self.len() == 0.0 {
                 Vec3::zero()
@@ -192,7 +424,7 @@ pub mod graphics {
         pub fn lerp(&self) -> Pixel {
             let unit_vec = self.direction.unit();
             let y = 0.5 * (unit_vec.y() + 1.0);
-            ((1.0 - y) * MyPixel::new(1.0, 1.0, 1.0) + y * MyPixel::new(0.5, 0.7, 1.0)).to_pixel()
+            ((1.0 - y) * Colour::new(1.0, 1.0, 1.0) + y * Colour::new(0.5, 0.7, 1.0)).to_pixel()
         }
     }
     
@@ -251,39 +483,38 @@ pub mod graphics {
         }
     }
 
-    #[derive(Debug)]
-    pub struct MyPixel {
-        r: f64,
-        g: f64,
-        b: f64,
-    }
-
-    impl MyPixel {
-        fn new(r: f64, g: f64, b: f64) -> Self {
-            MyPixel {
-                r,
-                g,
-                b,
-            }
+    type Colour = Vec3;
+    
+    impl Colour {
+        fn r(&self) -> f64 {
+            self.0
+        }
+        
+        fn g(&self) -> f64 {
+            self.1
+        }
+        
+        fn b(&self) -> f64 {
+            self.2
         }
 
         fn to_pixel(&self) -> Pixel {
             // ! DEBUG STATEMENT - ensure no overflows
             assert!(self.is_valid());
 
-            px!((self.r * RGB_SCALE) as u8, (self.g * RGB_SCALE) as u8, (self.b * RGB_SCALE) as u8)
+            px!((self.r() * RGB_SCALE) as u8, (self.g() * RGB_SCALE) as u8, (self.b() * RGB_SCALE) as u8)
         }
 
         fn is_valid(&self) -> bool {
-            (self.r >= 0.0 && self.r <= 255.0) && (self.g >= 0.0 && self.g <= 255.0) && (self.b >= 0.0 && self.b <= 255.0)
+            (self.r() >= 0.0 && self.r() <= 255.0) && (self.g() >= 0.0 && self.g() <= 255.0) && (self.b >= 0.0 && self.b <= 255.0)
         }
     }
 
-    impl Mul<MyPixel> for f64 {
-        type Output = MyPixel;
+    impl Mul<Colour> for f64 {
+        type Output = Colour;
 
-        fn mul(self, rhs: MyPixel) -> Self::Output {
-            MyPixel {
+        fn mul(self, rhs: Colour) -> Self::Output {
+            Colour {
                 r: self * (rhs.r as f64),
                 g: self * (rhs.g as f64),
                 b: self * (rhs.b as f64),
@@ -291,11 +522,11 @@ pub mod graphics {
         }
     }
 
-    impl Mul<f64> for MyPixel {
-        type Output = MyPixel;
+    impl Mul<f64> for Colour {
+        type Output = Colour;
 
         fn mul(self, rhs: f64) -> Self::Output {
-            MyPixel {
+            Colour {
                 r: self.r as f64 * rhs,
                 g: self.g as f64 * rhs,
                 b: self.b as f64 * rhs,
@@ -303,10 +534,10 @@ pub mod graphics {
         }
     }
 
-    impl Add for MyPixel {
+    impl Add for Colour {
         type Output = Self;
         fn add(self, rhs: Self) -> Self::Output {
-            MyPixel {
+            Colour {
                 r: self.r + rhs.r,
                 g: self.g + rhs.g,
                 b: self.b + rhs.b,
