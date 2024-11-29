@@ -5,7 +5,7 @@ macro_rules! impl_vec_struct {
     (pub $type:ident => {
         $($fields:ident: $types:ty),*
     }) => {
-        #[derive(Debug, Clone, Copy, PartialEq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         pub struct $type {
             $(pub $fields: $types),*
         }
@@ -18,7 +18,7 @@ macro_rules! impl_vec_struct {
     ($type:ident => {
         $($fields:ident: $types:ty),*
     }) => {
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Copy, PartialEq, Default)]
         struct $type {
             $(pub $fields: $types),*
         }

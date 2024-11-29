@@ -53,6 +53,7 @@ fn main() {
         "test" => viewport.test_file_format(save_path),
         "gradient" => viewport.test_gradient(save_path),
         "center" => viewport.test_viewport(save_path),
+        "sphere" => viewport.test_sphere(save_path),
         _ => eprintln!("Unexpected raytracing mode. Please specify either test, gradient or center.")
     }
 }

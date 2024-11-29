@@ -1,5 +1,5 @@
-use super::{colour::Colour, vec3::*};
-use bmp::{Pixel, px};
+use super::{colour::Colour, sphere::Sphere, vec3::*};
+use bmp::Pixel;
 
 #[derive(Debug)]
 pub struct Ray {
@@ -14,7 +14,12 @@ impl Ray {
 
     // TODO: Add functionality (currently a stub)
     pub fn get_colour(&self) -> Pixel {
-        px!(0, 0, 0)
+        if Sphere::new(0, 0, -2, 1, None).hit(self) {
+            // TODO: Remove placeholder colour
+            Colour::red().into()
+        } else {
+            self.gradient(Colour::white(), Colour::blue())
+        }
     }
 
     // TODO: Add functionality to specify the direction of the gradient
