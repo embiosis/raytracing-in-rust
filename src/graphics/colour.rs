@@ -3,7 +3,7 @@ use crate::impl_vec_struct;
 use bmp::{Pixel, px};
 
 // ! Remove this if unused
-// const RGB_SCALE: f64 = 255.999;
+pub const RGB_SCALE: f64 = 255.999;
 
 impl_vec_struct!(pub Colour => {r: f64, g: f64, b: f64});
 
@@ -13,6 +13,8 @@ impl Display for Colour {
     }
 }
 
+// TODO: Remove this attribute later.
+#[allow(dead_code)]
 impl Colour {
     // Check whether the colour is a valid RGB value.
     fn is_valid(&self) -> bool {

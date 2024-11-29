@@ -22,13 +22,21 @@ fn main() {
     let mut height: u32 = DEFAULT_HEIGHT;
 
     // parse arguments
-    if args.len() >= 3 {
-        width = args[2].trim().parse().unwrap();
-    } else if args.len() >= 4 {
-        height = args[3].trim().parse().unwrap();
-    } else {
-        println!("Usage: cargo run -- [test | render] [width] [aspect-ratio]");
+    if args.len() <= 3 {
+        println!("Usage: cargo run -- [test | render] [width] [height]");
         return;
+    }
+
+    if args.len() > 3 {
+        width = args[2].trim().parse().unwrap();
+        // ! DEBUG STATEMENT
+        // println!("width: {width}")
+    }
+    
+    if args.len() > 4 {
+        height = args[3].trim().parse().unwrap();
+        // ! DEBUG STATEMENT
+        // println!("height: {height}")
     }
 
     let viewport = Viewport::new(width, height, 0.0, 2.0, Vec3::zero());
