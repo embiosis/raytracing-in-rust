@@ -2,11 +2,7 @@ extern crate bmp;
 
 #[allow(unused_imports)]
 use bmp::{Image, Pixel, px};
-use raytracer::graphics::Vec3;
-
-#[allow(unused_imports)]
-use raytracer::graphics::Ray;
-use raytracer::graphics::Viewport;
+use raytracer::graphics::{viewport::*, vec3::*};
 
 use std::env::args;
 
