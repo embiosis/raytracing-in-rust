@@ -8,4 +8,5 @@ pub mod graphics {
 
     pub mod colour;
     pub mod material;
+    pub mod collision;
 }

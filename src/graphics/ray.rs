@@ -34,6 +34,16 @@ impl Ray {
     pub fn get_colour(&self) -> Pixel {
         let sphere = Sphere::new(0, 0, -1, 0.5, None);
 
+        if let Some(_) = self.hit_sphere(&sphere) {
+            Colour::red().into()
+        } else {
+            self.gradient(Colour::white(), Colour::new(128, 179, 255))
+        }
+    }
+
+    pub fn get_normals(&self) -> Pixel {
+        let sphere = Sphere::new(0, 0, -1, 0.5, None);
+
         if let Some(lambda) = self.hit_sphere(&sphere) {
             let normal = sphere
                 .normal(self.at(lambda))

@@ -1,3 +1,5 @@
+use super::ray::Ray;
+
 
 // Create a struct with the specified fields which implements vector arithmetic.
 #[macro_export]

@@ -101,6 +101,7 @@ impl Viewport {
         img.save(save_path).expect("An error occurred while saving to {save_path}!")
     }
 
+    // Chapter 5.2 image
     pub fn test_sphere(&self, save_path: String) {
         let mut img = Image::new(self.image_width, self.image_height);
 
@@ -109,6 +110,20 @@ impl Viewport {
             let ray_dir = pixel_center - self.camera_center;
             let ray = Ray { origin: self.camera_center, direction: ray_dir };
             img.set_pixel(x, y, ray.get_colour());
+        }
+
+        img.save(save_path).expect("An error occurred while saving to {save_path}!")
+    }
+
+    // Chapter 6.1 image
+    pub fn test_normals(&self, save_path: String) {
+        let mut img = Image::new(self.image_width, self.image_height);
+
+        for (x, y) in img.coordinates() {
+            let pixel_center = self.get_pixel_coord(x, y);
+            let ray_dir = pixel_center - self.camera_center;
+            let ray = Ray { origin: self.camera_center, direction: ray_dir };
+            img.set_pixel(x, y, ray.get_normals());
         }
 
         img.save(save_path).expect("An error occurred while saving to {save_path}!")
