@@ -1,4 +1,4 @@
-use super::{colour::Colour, vec3::Vec3};
+use super::{colour::Colour, vec3::*};
 use bmp::{Pixel, px};
 
 #[derive(Debug)]

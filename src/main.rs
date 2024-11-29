@@ -7,8 +7,9 @@ use raytracer::graphics::{viewport::*, vec3::*};
 use std::{env::args, time::{SystemTime, UNIX_EPOCH}};
 
 const DEFAULT_WIDTH: u32 = 1920;
-const DEFAULT_ASPECT_RATIO: f64 = 16.0 / 9.0;
+const DEFAULT_HEIGHT: u32 = 1080;
 
+// TODO: Remove this enum and the attribute later.
 #[allow(dead_code)]
 enum FileNameType {
     UnixTime,
@@ -18,19 +19,19 @@ enum FileNameType {
 fn main() {
     let args: Vec<String> = args().collect();
     let mut width: u32 = DEFAULT_WIDTH;
-    let mut aspect_ratio: f64 = DEFAULT_ASPECT_RATIO;
+    let mut height: u32 = DEFAULT_HEIGHT;
 
     // parse arguments
     if args.len() >= 3 {
         width = args[2].trim().parse().unwrap();
     } else if args.len() >= 4 {
-        aspect_ratio = args[3].trim().parse().unwrap();
+        height = args[3].trim().parse().unwrap();
     } else {
         println!("Usage: cargo run -- [test | render] [width] [aspect-ratio]");
         return;
     }
 
-    let viewport = Viewport::new(width, 0.0, 2.0, aspect_ratio, Vec3::zero());
+    let viewport = Viewport::new(width, height, 0.0, 2.0, Vec3::zero());
 
     // TODO: Remove this stub and use clap to properly parse arguments!
     // TODO: Take a user-defined file name, or use the current time as a default.
