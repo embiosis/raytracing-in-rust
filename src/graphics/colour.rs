@@ -35,6 +35,14 @@ impl Colour {
         }
     }
 
+    // Maps values from range 0 - 1 to an associated RGB value.
+    pub fn lerp(r: f64, g: f64, b: f64) -> Self {
+        Self {
+            r: r * RGB_SCALE,
+            g: g * RGB_SCALE,
+            b: b * RGB_SCALE,
+        }
+    }
     // Functions to initialise some basic RGB colours.
     pub fn black() -> Self {
         Self::new(0, 0, 0)
