@@ -12,11 +12,34 @@ impl Ray {
         self.origin + self.direction * lambda
     }
 
+    pub fn hit_sphere(&self, sphere: &Sphere) -> Option<f64> {
+        let position_vec = sphere.centre - self.origin;
+        
+        // Use the quadratic formula to check for intersections
+        // between the ray and the sphere.
+        let a = self.direction * self.direction;
+        let h = self.direction * position_vec;
+        let c = position_vec * position_vec - sphere.radius * sphere.radius;
+
+        let discriminant = h * h - a * c;
+        
+        if discriminant < 0.0 {
+            None
+        } else {
+            Some( (h - discriminant.sqrt()) / a )
+        }
+    }
+
     // TODO: Add functionality (currently a stub)
     pub fn get_colour(&self) -> Pixel {
-        if Sphere::new(0, 0, -1, 0.5, None).hit(self) {
-            // TODO: Remove placeholder colour
-            Colour::red().into()
+        let sphere = Sphere::new(0, 0, -1, 0.5, None);
+
+        if let Some(lambda) = self.hit_sphere(&sphere) {
+            let normal = sphere
+                .normal(self.at(lambda))
+                .expect("The point should always lie on the sphere");
+
+            (0.5 * Colour::lerp(1.0 + normal.x, 1.0 + normal.y, 1.0 + normal.z)).into()
         } else {
             self.gradient(Colour::white(), Colour::new(128, 179, 255))
         }

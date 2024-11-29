@@ -1,13 +1,13 @@
-use super::{material::Material, ray::Ray, vec3::Vec3};
+use super::{material::Material, vec3::Vec3};
 
 // TODO: Figure out the degree of precision for floating point comparisons.
 const EPSILON: f64 = 0.000001;
 
 #[derive(Clone, Default)]
 pub struct Sphere {
-    centre: Vec3,
-    radius: f64,
-    material: Material
+    pub centre: Vec3,
+    pub radius: f64,
+    pub material: Material
 }
 
 impl Sphere {
@@ -25,21 +25,17 @@ impl Sphere {
             },
         }
     }
-    pub fn hit(&self, ray: &Ray) -> Option<f64> {
-        let position_vec = self.centre - ray.origin;
-        
-        // Use the quadratic formula to check for intersections
-        // between the ray and the sphere.
-        let a = ray.direction * ray.direction;
-        let b = -2.0 * (ray.direction * position_vec);
-        let c = position_vec * position_vec - self.radius * self.radius;
+    
+    // Return the unit normal for a point if it lies on the sphere.
+    pub fn normal(&self, point: Vec3) -> Option<Vec3> {
+        let normal = point - self.centre;
 
-        let discriminant = b * b - (4.0 * a * c);
-        
-        if discriminant < 0.0 {
+        // Check if the point lies on the sphere.
+        if normal.sqrlen() - self.radius * self.radius > EPSILON {
             None
         } else {
-            Some( (-b - discriminant.sqrt()) / (2.0 * a) )
+            Some(normal.normalise())
         }
     }
+
 }
