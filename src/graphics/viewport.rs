@@ -59,13 +59,11 @@ impl Viewport {
     pub fn render(&self, save_path: String) {
         let mut img = Image::new(self.image_width, self.image_height);
 
-        for y in 0..self.image_height {
-            for x in 0..self.image_width {
-                let pixel_center = self.get_pixel_coord(x, y);
-                let ray_dir = pixel_center - self.camera_center;
-                let ray = Ray { origin: self.camera_center, direction: ray_dir };
-                img.set_pixel(x, y, ray.lerp()); 
-            }
+        for (x, y) in img.coordinates() {
+            let pixel_center = self.get_pixel_coord(x, y);
+            let ray_dir = pixel_center - self.camera_center;
+            let ray = Ray { origin: self.camera_center, direction: ray_dir };
+            img.set_pixel(x, y, ray.lerp());
         }
 
         img.save(save_path).expect("An error occurred while saving to {save_path}!")
