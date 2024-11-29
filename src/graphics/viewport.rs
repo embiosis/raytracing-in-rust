@@ -50,7 +50,7 @@ impl Viewport {
             // invert y-axis due to orientation of viewport coordinates
             viewport_j: Vec3::new(0.0, -viewport_height, 0.0), 
             pixel_delta_i: Vec3::new(viewport_width, 0.0, 0.0) / image_width as f64,
-            pixel_delta_j: Vec3::new(0.0, -viewport_height, 0.0) / image_width as f64,
+            pixel_delta_j: Vec3::new(0.0, -viewport_height, 0.0) / image_height as f64,
             viewport_upper_left: camera_center 
                                 - Vec3::new(0.0, 0.0, focal_length) 
                                 - Vec3::new(viewport_width, 0.0, 0.0) / 2.0 
@@ -81,11 +81,22 @@ impl Viewport {
             let pixel_center = self.get_pixel_coord(x, y);
             let ray_dir = pixel_center - self.camera_center;
             let ray = Ray { origin: self.camera_center, direction: ray_dir };
-            // print!("({x}, {y}): ");
-            img.set_pixel(x, y, ray.gradient(Colour::white(), Colour::blue()));
+            img.set_pixel(x, y, ray.gradient(Colour::white(), Colour::new(128, 179, 255)));
         }
 
         img.save(save_path).expect("An error occurred while saving to {save_path}!")
     }
 
+    pub fn test_viewport(&self, save_path: String) {
+        let mut img = Image::new(self.image_width, self.image_height);
+
+        for (x, y) in img.coordinates() {
+            let pixel_center = self.get_pixel_coord(x, y);
+            let ray_dir = pixel_center - self.camera_center;
+            let ray = Ray { origin: self.camera_center, direction: ray_dir };
+            img.set_pixel(x, y, ray.center_viewport());
+        }
+
+        img.save(save_path).expect("An error occurred while saving to {save_path}!")
+    }
 }

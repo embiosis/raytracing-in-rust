@@ -22,9 +22,9 @@ fn main() {
     let height: u32;
 
     // parse arguments
-    if args.len() < 3 {
-        println!("usage: cargo run -- [test | render] [width] (height)");
-        println!("if no height is provided, the program will default to an aspect ratio of 16:9");
+    if args.len() < 2 {
+        println!("usage: cargo run -- [test | gradient | center] (width) (height)");
+        println!("if no height or width is provided, the program will default to 1920px wide with an aspect ratio of 16:9");
         return;
     }
 
@@ -51,7 +51,8 @@ fn main() {
     
     match args.get(1).unwrap().trim() {
         "test" => viewport.test_file_format(save_path),
-        "render" => viewport.test_gradient(save_path),
-        _ => eprintln!("Unexpected raytracing mode. Please specify either test or render.")
+        "gradient" => viewport.test_gradient(save_path),
+        "center" => viewport.test_viewport(save_path),
+        _ => eprintln!("Unexpected raytracing mode. Please specify either test, gradient or center.")
     }
 }

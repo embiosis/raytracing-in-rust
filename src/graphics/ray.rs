@@ -21,6 +21,21 @@ impl Ray {
     pub fn gradient(&self, start_colour: Colour, end_colour: Colour) -> Pixel {
         let unit_vec = self.direction.normalise();
         let y = 0.5 * (unit_vec.y + 1.0);
+
+        // ! DEBUG STATEMENT
+        // println!("{y}");
         ((1.0 - y) * start_colour + y * end_colour).into()
+    }
+
+    pub fn center_viewport(&self) -> Pixel {
+        let Vec3 {x, y, ..} = self.direction.normalise();
+        
+        if y <= 0.05 && y >= -0.05 {
+            Colour::magenta().into()
+        } else if x <= 0.05 && x >= -0.05 {
+            Colour::magenta().into()
+        } else {
+            Colour::white().into()
+        }
     }
 }
