@@ -14,11 +14,11 @@ impl Ray {
 
     // TODO: Add functionality (currently a stub)
     pub fn get_colour(&self) -> Pixel {
-        if Sphere::new(0, 0, -2, 1, None).hit(self) {
+        if Sphere::new(0, 0, -1, 0.5, None).hit(self) {
             // TODO: Remove placeholder colour
             Colour::red().into()
         } else {
-            self.gradient(Colour::white(), Colour::blue())
+            self.gradient(Colour::white(), Colour::new(128, 179, 255))
         }
     }
 

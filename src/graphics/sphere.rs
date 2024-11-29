@@ -11,9 +11,10 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new<T>(x: T, y: T, z: T, radius: T, material: Option<Material>) -> Sphere
+    pub fn new<T, U>(x: T, y: T, z: T, radius: U, material: Option<Material>) -> Sphere
     where 
-        T: Into<f64> 
+        T: Into<f64>,
+        U: Into<f64>
     {
         Sphere {
             centre: Vec3::new(x, y, z),
@@ -24,7 +25,7 @@ impl Sphere {
             },
         }
     }
-    pub fn hit(&self, ray: &Ray) -> bool {
+    pub fn hit(&self, ray: &Ray) -> Option<f64> {
         let position_vec = self.centre - ray.origin;
         
         // Use the quadratic formula to check for intersections
@@ -35,6 +36,10 @@ impl Sphere {
 
         let discriminant = b * b - (4.0 * a * c);
         
-        discriminant >= 0.0
+        if discriminant < 0.0 {
+            None
+        } else {
+            Some( (-b - discriminant.sqrt()) / (2.0 * a) )
+        }
     }
 }
