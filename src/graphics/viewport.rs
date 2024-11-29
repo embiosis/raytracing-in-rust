@@ -51,7 +51,7 @@ impl Viewport {
             pixel_delta_j: Vec3::new(0.0, -viewport_size, 0.0) / (image_width as f64),
             viewport_upper_left: camera_center 
                                 - Vec3::new(0.0, 0.0, focal_length) 
-                                - Vec3::new(viewport_size, 0.0, 0.0) / 2.0 
+                                - Vec3::new(viewport_size * aspect_ratio, 0.0, 0.0) / 2.0 
                                 - Vec3::new(0.0, -viewport_size, 0.0) / 2.0
         }
     }
@@ -63,7 +63,8 @@ impl Viewport {
             let pixel_center = self.get_pixel_coord(x, y);
             let ray_dir = pixel_center - self.camera_center;
             let ray = Ray { origin: self.camera_center, direction: ray_dir };
-            img.set_pixel(x, y, ray.lerp());
+            // println!("({x}, {y}): Ray {{{}, {}}}, {}", ray.origin, ray.direction, ray.gradient(Colour::white(), Colour::blue()));
+            img.set_pixel(x, y, ray.gradient(Colour::white(), Colour::blue()));
         }
 
         img.save(save_path).expect("An error occurred while saving to {save_path}!")
